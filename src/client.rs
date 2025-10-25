@@ -25,17 +25,18 @@ impl SlackApiClient {
             .into());
         };
 
+        let status_code = resp.get_status_code();
         let result = resp.receive_body().await;
 
         let Ok(body_bytes) = result else {
-            return Err(format!("FlUrl failed to receive_body: {:?}", result.unwrap_err()).into());
+            return Err(format!("Failed receive_body: {:?}", result.unwrap_err()).into());
         };
 
         let body_str = String::from_utf8(body_bytes).unwrap();
-        if body_str.contains("OK") {
+        if status_code < 300 {
             Ok(())
         } else {
-            Err(format!("HTTP {}: {}", url, body_str))
+            Err(format!("Failed HTTP {}: {}", url, body_str))
         }
     }
 }
